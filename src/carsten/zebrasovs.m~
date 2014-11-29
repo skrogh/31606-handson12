@@ -1,0 +1,14 @@
+%% Animal identification
+animal = wavread('animal_call.wav');
+
+%we are guessing it's an image imbedded in the spectrum because the wave
+%file sounds synthetic
+figure(1); clf(1);
+spectrogram(animal,floor(sqrt(length(animal)))); axis square; view(-90,90); 
+% what a surprise!
+title('Decrypted Zebra');
+%make the image pretty
+colormap gray;
+cmap = colormap
+flip(cmap);
+colormap(cmap);
