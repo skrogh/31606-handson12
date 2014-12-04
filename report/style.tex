@@ -3,11 +3,11 @@
 %---------%
 
 %Section formating. arg1 is supplied when making section
-\newcommand\presectionnumber[1]{}
-\newcommand\postsectionnumber[1]{~#1}
-\newcommand\midlesection[1]{}
-\newcommand\sectionnum[1]{}%\arabic{#1}}
-\newcommand\subsectionnum[1]{\roman{#1}}
+\newcommand\presectionnumber[1]{~~}
+\newcommand\postsectionnumber[1]{}
+\newcommand\midlesection[1]{#1}
+\newcommand\sectionnum[1]{\arabic{#1}}
+\newcommand\subsectionnum[1]{\arabic{#1}}
 \newcommand\subsubsectionnum[1]{\alph{#1}}
 
 
@@ -20,9 +20,9 @@
 \definecolor{MagRed}{RGB}{190,40,15}
 \definecolor{MathGreen}{RGB}{82,164,0}
 
-\titleformat{\section}{\normalfont\sffamily\large\bfseries\color{MathGreen}}{}{0pt}{|\kern-0.15ex|\kern-0.15ex|\kern-0.15ex|\presectionnumber{#1}\sectionnum{section}\postsectionnumber{#1}\qquad\quad\midlesection{#1}\label{\sectionnum{section}}}
-\titleformat{\subsection}[runin]{\large\bfseries}{}{10pt}{\subsectionnum{subsection})~#1\label{\sectionnum{section}\subsectionnum{subsection}}}
-\titleformat{\subsubsection}[runin]{\itshape}{}{0pt}{\subsectionnum{subsection},\subsubsectionnum{subsection}~#1\label{\sectionnum{section}\subsectionnum{subsection}\subsubsectionnum{subsubsection}}}
+\titleformat{\section}{\normalfont\sffamily\large\bfseries\color{MathGreen}}{}{0pt}{|\kern-0.15ex|\kern-0.15ex|\kern-0.15ex|\presectionnumber{#1}\sectionnum{section}\postsectionnumber{#1}\qquad\quad\midlesection{#1}\label{sec:\sectionnum{section}}}
+\titleformat{\subsection}[runin]{\large\bfseries}{}{10pt}{\sectionnum{section}.\subsectionnum{subsection})~#1\label{sec:\sectionnum{section}.\subsectionnum{subsection}}}
+\titleformat{\subsubsection}[runin]{\itshape}{}{0pt}{\subsectionnum{subsection},\subsubsectionnum{subsection}~#1\label{sec:\sectionnum{section}.\subsectionnum{subsection}.\subsubsectionnum{subsubsection}}}
 %\titleformat{\subsubsection}{\bfseries}{}{0pt}{\alph{subsection}.\arabic{subsubsection})\qquad\quad#1\label{\arabic{section}\alph{subsection}\arabic{subsubsection}}}
 
 %----------%

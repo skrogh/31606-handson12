@@ -1,0 +1,80 @@
+\subsection{Get rid of it}
+Now that we have our \emph{STFT} and \emph{ISTFT} functions, it is time to put
+them to use.
+
+We load a wave file, signal $s$, with a sencence about the cocktail effect (the
+abilty to idetify a single speaker in an ocean of noise).
+
+Performing an \emph{STFT} on the signal with the following settings:
+\begin{itemize}
+  \item Window length: $256$
+  \item Window type: $\sqrt{\mbox{hann}}$
+  \item Zero pad to length: $256 \cdot 4 = 1024$
+  \item Overlap of $50\%$
+\end{itemize}
+
+We can plot the spectrogram of this signal $S$, as seen in figure
+\ref{fig:2-1-signal}
+\stdfignoscale{2-1-signal}{Spectrogram of the signal
+\emph{cocktail.wav}}{fig:2-1-signal}
+
+We also generate some gaussian white noise $nosie$ and scale this so:
+$\sqrt{ \mbox{mean}( noise^2 ) } = \sqrt{ \mbox{mean}( s^2 ) } \cdot (-10
+\mbox{dB})$
+
+We name the \emph{STFT} of this signal $NOISE$.
+This noise has the spectrogram seen in figure \ref{fig:2-1-noise}
+\stdfignoscale{2-1-noise}{Spectrogram of the noise. Note that
+even though this is white noises, the spectrum is not
+compleatly flat, but looks more like a tv-screen with no signal}{fig:2-1-noise}
+
+Adding these two signals in the time domain we get the signal $s_{+noise} = s
++ noise$, with the \emph{STFT} $S_{+noise}$. This signal has the spectrum seen
+in figure \ref{fig:2-1-signal-noise}
+\stdfignoscale{2-1-signal-noise}{Spectrogram of the signal + noise.}{fig:2-1-signal-noise}
+
+\paragraph{Denoising}
+To denoise the signal, we estimate the noise floor and cut out anything below
+some value above this floor.
+
+The noise floor is estimated at:
+\begin{equation*}
+\widehat{NOISE} = \mbox{mean}(NOISE)
+\end{equation*}
+
+We then define $3$ gating levels: $LVL_1 = \widehat{NOISE}$, $LVL_2 =
+2\widehat{NOISE}$, $LVL_3 = 3\widehat{NOISE}$
+
+And use this to create the denoised \emph{STFT}s:
+\begin{gather*}
+\widehat{SIGNAL}_1 = \begin{cases}
+      				S_{+noise}, & \text{if}\ \abs{S_{+noise}} > LVL_1 \\
+      				0, & \text{otherwise}
+    			 \end{cases}
+\\
+\widehat{SIGNAL}_2 = \begin{cases}
+      				S_{+noise}, & \text{if}\ \abs{S_{+noise}} > LVL_2 \\
+      				0, & \text{otherwise}
+    			 \end{cases}
+\\
+\widehat{SIGNAL}_3 = \begin{cases}
+      				S_{+noise}, & \text{if}\ \abs{S_{+noise}} > LVL_3 \\
+      				0, & \text{otherwise}
+    			 \end{cases}
+\end{gather*}
+
+Spectrograms of these denoised signals can be seen in figure
+\ref{fig:2-1-est1}, \ref{fig:2-1-est2}, and \ref{fig:2-1-est3}.
+Note how the level if noise is reduced, but part of the speach signal is also
+removed. Especially the high frequencies (because they have low magnitude) and
+the consonant (because they are mostly noise and thus the energy is spread wide
+in the frequency, leading to a low magintude) are compromised.
+
+\stdfignoscale{2-1-est1}{Spectrogram of the denoised signal for a
+gating level of $\widehat{NOISE}$}{fig:2-1-est1}
+\stdfignoscale{2-1-est2}{Spectrogram of the denoised signal for a
+gating level of $2\widehat{NOISE}$}{fig:2-1-est2}
+\stdfignoscale{2-1-est2}{Spectrogram of the denoised signal for a
+gating level of $3\widehat{NOISE}$}{fig:2-1-est3}
+
+

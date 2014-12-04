@@ -18,6 +18,7 @@
 \usepackage{polynom} %for displaying polynom division
 \usepackage{mathtools} % matematik - understøtter muligheden for at bruge \eqref{}
 \usepackage{float}
+\usepackage{placeins}
 \usepackage{hhline}
 
 %
@@ -121,7 +122,7 @@
 \newcommand\del[2]{\frac{\partial {#1}}{\partial {#2}}}
 \newcommand\abs[1]{\left| {#1} \right|}
 \newcommand\stdfig[4]{ %width,img,cap,lab
-\begin{figure}[hb!]
+\begin{figure}[H]
 \centering
 \includegraphics[width={#1}\textwidth]{#2}
 \caption{#3}
@@ -129,7 +130,7 @@
 \end{figure}
 }
 \newcommand\stdfignoscale[3]{ %img,cap,lab
-\begin{figure}[hb!]
+\begin{figure}[H]
 \centering
 \includegraphics{#1}
 \caption{#2}

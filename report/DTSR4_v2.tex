@@ -1,0 +1,88 @@
+\section{Spectral subtraction}
+
+\subsection{STFT and ISTFT}
+%For each problem, outline the problem in your own words, your approach, what you did and why you did it.
+The task is to contaminate a signal \emph{cocktailparty.wav} with gaussian
+white noise (additively) and then denoise/subtract the noise by zeroing every
+sample in the time-frequency domain that lies below the mean magnitude of the
+signal plus noise (thresholding). This spectral subtraction requires the STFT
+and the inverse ISTFT. The transform functions are shown in
+Figure~\ref{fig:STFT} and ref{fig:ISTFT}.
+
+\begin{lstlisting}[
+style=Matlab-editor,
+basicstyle=\ttfamily\footnotesize,
+numbers=none,
+label=fig:STFT,
+caption={Implementation of the \texttt{STFT}}]
+function [S] = STFT(s, w, h, p); %assumes real signal
+%INPUT: Signal: s. Window: w. Hop size: h. FFT points: p.
+%OUTPUT: STFT matrix: S.
+%Initialize constants and STFT matrix:
+Lw = length(w); Ls = length(s);
+N = ceil((p+1)/2); M = 1+floor((Ls-Lw)/h); %proper count of positive freqs
+S = zeros(N, M);
+%Compute STFT:
+i = 0;
+for j=1:M
+    Q = fft(s(i+1:i+Lw).*w, p); %window interval and transform
+    S(:,j) = Q(1:N);            %copy positive frequencies and DC
+    i = i + h;                  %inc by hop size
+end
+end %eof
+\end{lstlisting}
+\begin{lstlisting}[
+style=Matlab-editor,
+basicstyle=\ttfamily\footnotesize,
+numbers=none,
+label=fig:ISTFT,
+caption={Implementation of the \texttt{ISTFT}}]
+function [s] = ISTFT(S, w, h, p); %assumes real signal
+%INPUT: STFT matrix: S. Window: w. Hop size: h. FFT points: p.
+%OUTPUT: Signal: s.
+%Initialize constants and signal vector:
+M = size(S, 2); 
+Lw = length(w); Ls = Lw + (M-1)*h;  %since M = 1+floor((Ls-Lw)/h)
+s = zeros(Ls, 1);
+%Compute ISTFT using overlap-add:
+i = 0;
+if mod(p, 2) == 1    %nyquist fft fencepost error correction
+    for j = 1:M
+        P = S(:,j);                                     %load time slice
+        Q = conj(flipud(P(2:end)));    %with nyquist    %negative freqs
+        R = ifft([P; Q]);                               %IFFT time slice
+        s((i+1):(i+Lw)) = s((i+1):(i+Lw))+(R(1:Lw).*w); %overlap-add
+        i = i + h;                                      %inc by hop size
+    end
+elseif mod(p, 2) == 0
+    for j = 1:M
+        P = S(:,j);
+        Q = conj(flipud(P(2:end-1)));
+        R = ifft([P; Q]);
+        s((i+1):(i+Lw)) = s((i+1):(i+Lw))+(R(1:Lw).*w);
+        i = i + h;
+    end
+end
+%Normalize signal vector:
+s = (s*h)/(sum(w.^2));  %Normalize using norm squared of the window
+end %eof
+\end{lstlisting}
+
+\noindent The discrete STFT of a signal with respect to an arbitrary window function $w$ is computed by applying the window to the beginning, fourier transforming, incrementing window placement by the hop size and repeating until the next window increment overshoots the length of the signal. In this way the frequency content of each windowed interval is extracted and the resulting matrix is the time-frequency analysis of the signal. Let $x$ be any signal, then the STFT is defined by
+\begin{align*}
+\textnormal{STFT}(x)(t,f)=\sum^{N-1}_{n=0}x(n)T_{th} w(n)e^{-2\pi i \frac{n}{N} f} = \mathcal{F}(x T_{th} w)(f)
+\end{align*}
+where both the signal $x$ and the window $w$ has length $N$ and the constant $h$ is the hop size. The operator $T_k$ circularly permutes the elements of the operand forward by $k$ entries.\\
+
+\noindent The discrete inverse ISTFT can be obtained directly from the operator form of the definition. 
+ Let $X_t(f)=\mathcal{F}(x T_{th} w)(f)$, then $x T_{th} w = \mathcal{F}^{-1}X_{t}$ and therefore 
+\begin{align*}
+\sum^{M-1}_{t=0} x(n) (T_{th} w(n))^2 = \sum^{M-1}_{t=0} T_{th} w(n) \mathcal{F}^{-1}X_{t}(n) 
+\end{align*}
+Assuming $\sum^{M-1}_{t=0} (T_{th} w(n))^2 > 0$ for all $0\leq n \leq N-1$ (any point is inside at least one window), then $x$ can be recovered as
+\begin{align*}
+x(n) = \frac{\sum^{M-1}_{t=0} T_{th} w(n)\mathcal{F}^{-1}X_{t}(n)}{\sum^{M-1}_{t=0} (T_{th} w(n))^2}
+\end{align*}
+For certain window types and hop sizes the quantities $\sum^{M-1}_{t=0} (T_{th} w(n))^2$ are independent of $n$.
+This is the basis of the implementation using the overlap-add method in
+Listing~\ref{fig:STFT} and \ref{fig:ISTFT} .\\
